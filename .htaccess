@@ -1,5 +1,5 @@
 <IfModule mod_rewrite.c>
-  RewriteEngine on
-  RewriteRule ^$ dev.paulmiller3000.com/public/ [L]
-  RewriteRule (.*) dev.paulmiller3000.com/public/$1 [L]
+  	RewriteEngine on
+  	RewriteRule ^$ public/ [L]
+	#RewriteRule (.*) public/$1 [L]
 </IfModule>
