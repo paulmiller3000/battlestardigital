@@ -1,5 +1,288 @@
+<IfModule mod_expires.c>
+	ExpiresActive On
+	ExpiresByType image/jpg "access plus 4 hours"
+	ExpiresByType image/jpeg "access plus 4 hours"
+	ExpiresByType image/gif "access plus 4 hours"
+	ExpiresByType image/png "access plus 4 hours"
+	ExpiresByType text/css "access plus 6 hours"
+	ExpiresByType application/pdf "access plus 1 week"
+	ExpiresByType text/javascript "access plus 6 hours"
+	ExpiresByType text/html "access plus 10 minutes"
+	ExpiresByType image/x-icon "access plus 1 year"
+	ExpiresDefault "access plus 3 hours"
+</IfModule>
+#
+<IfModule mod_headers.c>
+	Header set X-Endurance-Cache-Level "2"
+</IfModule>
+#
 <IfModule mod_rewrite.c>
   	RewriteEngine on
   	RewriteRule ^$ public/ [L]
 	RewriteRule (.*) public/$1 [L]
 </IfModule>
+#
+# Code below, source: https://gist.github.com/ludo237/5857215
+# ----------------------------------------------------------------------
+# Default Lang and Basic Security Behavior
+# ----------------------------------------------------------------------
+# X-Powered-By hidden by default nobody will notice if you're using PHP
+Header unset X-Powered-By
+# Add default charset
+AddDefaultCharset UTF-8
+# Set the default charset for every feed method
+AddCharset utf-8 .atom .css .js .json .rss .vtt .xml
+# Do not allow any pages to be framed - Defends against CSRF
+Header set X-Frame-Options SAMEORIGIN
+# Turn on IE8-IE9 XSS prevention tools
+Header set X-XSS-Protection "1; mode=block"
+Header set X-Content-Type-Options "nosniff"
+# Disable server sign
+ServerSignature Off
+# drop Range header when more than 5 ranges. CVE-2011-3192
+SetEnvIf Range (,.*?){5,} bad-range=1
+RequestHeader unset Range env=bad-range
+# LIMIT UPLOAD FILE SIZE TO PROTECT AGAINST DOS ATTACK. Bytes, 0-2147483647(2GB)
+LimitRequestBody 2147483647
+#
+#
+# ----------------------------------------------------------------------
+# Better website experience for IE users. We care about them LOL
+# ----------------------------------------------------------------------
+# Force the latest IE version, in various cases when it may fall back to IE7 mode
+# futher details: github.com/rails/rails/commit/123eb25#commitcomment-118920
+# Use ChromeFrame if it's installed for a better experience for the poor IE folks
+<IfModule mod_headers.c>
+	Header set X-UA-Compatible "IE=Edge,chrome=1"
+  	# mod_headers cannnot match by content-type, but we don't want to send this header on *everything*...
+  	<FilesMatch "\.(js|css|gif|png|jpe?g|pdf|xml|oga|ogg|m4a|ogv|mp4|m4v|webm|svg|svgz|eot|ttf|otf|woff|ico|webp|appcache|manifest|htc|crx|oex|xpi|safariextz|vcf)$" >
+    	Header unset X-UA-Compatible
+	</FilesMatch>
+  # Header set P3P "policyref="/w3c/p3p.xml", CP="NOI DSP COR NID CUR ADM DEV OUR BUS""
+  # OR THIS, SIMPLER
+  # Header set P3P "policyref="/w3c/p3p.xml""
+</IfModule>
+#
+#
+# ----------------------------------------------------------------------
+# Proper MIME type for all files
+# ----------------------------------------------------------------------
+# JavaScript
+# Normalize to standard type (it is sniffed in IE anyways)
+# futher details: tools.ietf.org/html/rfc4329#section-7.2
+AddType application/javascript         js jsonp
+AddType application/json               json
+#
+# Audio
+#
+AddType audio/ogg                      oga ogg
+AddType audio/mp4                      m4a f4a f4b
+#
+# Video
+#
+AddType video/ogg                      ogv
+AddType video/mp4                      mp4 m4v f4v f4p
+AddType video/webm                     webm
+AddType video/x-flv                    flv
+#
+# SVG
+# Required for svg webfonts on iPad
+# futher details: twitter.com/FontSquirrel/status/14855840545
+#
+AddType     image/svg+xml              svg svgz
+AddEncoding gzip                       svgz
+#
+# Webfonts
+#
+AddType application/vnd.ms-fontobject  eot
+AddType application/x-font-ttf         ttf ttc
+AddType font/opentype                  otf
+AddType application/x-font-woff        woff
+#
+# Assorted types
+#
+AddType image/x-icon                        ico
+AddType image/webp                          webp
+AddType text/cache-manifest                 appcache manifest
+AddType text/x-component                    htc
+AddType application/xml                     rss atom xml rdf
+AddType application/x-chrome-extension      crx
+AddType application/x-opera-extension       oex
+AddType application/x-xpinstall             xpi
+AddType application/octet-stream            safariextz
+AddType application/x-web-app-manifest+json webapp
+AddType text/x-vcard                        vcf
+AddType application/x-shockwave-flash       swf
+AddType text/vtt                            vtt
+#
+#
+# ----------------------------------------------------------------------
+# Compression
+# ----------------------------------------------------------------------
+<IfModule mod_deflate.c>
+  	# Force deflate for mangled headers developer.yahoo.com/blogs/ydn/posts/2010/12/pushing-beyond-gzipping/
+	<IfModule mod_setenvif.c>
+		<IfModule mod_headers.c>
+  			SetEnvIfNoCase ^(Accept-EncodXng|X-cept-Encoding|X{15}|~{15}|-{15})$ ^((gzip|deflate)\s*,?\s*)+|[X~-]{4,13}$ HAVE_Accept-Encoding
+      		RequestHeader append Accept-Encoding "gzip,deflate" env=HAVE_Accept-Encoding
+		</IfModule>
+	</IfModule>
+	# Compress all output labeled with one of the following MIME-types
+	<IfModule mod_filter.c>
+    	AddOutputFilterByType DEFLATE application/atom+xml \
+                                  application/javascript \
+                                  application/json \
+                                  application/rss+xml \
+                                  application/vnd.ms-fontobject \
+                                  application/x-font-ttf \
+                                  application/xhtml+xml \
+                                  application/xml \
+                                  font/opentype \
+                                  image/svg+xml \
+                                  image/x-icon \
+                                  text/css \
+                                  text/html \
+                                  text/plain \
+                                  text/x-component \
+                                  text/xml
+  	</IfModule>
+</IfModule>
+#
+#
+# ----------------------------------------------------------------------
+# Expires headers (for better cache control)
+# ----------------------------------------------------------------------
+# "access plus 1 year" and "plus 1 month" are pretty far-future expires headers.
+# They assume you control versioning with filename-based cache busting
+# Additionally, consider that outdated proxies may miscache
+# futher details: www.stevesouders.com/blog/2008/08/23/revving-filenames-dont-use-querystring/
+# If you do not use filenames to version, lower the CSS and JS to something like "access plus 1 week".
+# 1 YEAR - does not change often
+<FilesMatch "\.(flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav)$">
+	ExpiresDefault A29030400
+</FilesMatch>
+<IfModule mod_expires.c>
+  	ExpiresActive on
+#
+	ExpiresDefault                          "access plus 1 month"
+#
+# cache.appcache needs re-requests in FF 3.6 (thanks Remy ~Introducing HTML5)
+#
+	ExpiresByType text/cache-manifest       "access plus 0 seconds"
+#
+# Your document html
+#
+	ExpiresByType text/html                 "access plus 0 seconds"
+#
+# Data
+#
+	ExpiresByType text/xml                  "access plus 0 seconds"
+	ExpiresByType application/xml           "access plus 0 seconds"
+	ExpiresByType application/json          "access plus 0 seconds"
+#
+# Feed
+#
+	ExpiresByType application/rss+xml       "access plus 1 hour"
+	ExpiresByType application/atom+xml      "access plus 1 hour"
+#
+# Favicon (cannot be renamed)
+	ExpiresByType image/x-icon              "access plus 1 month"
+#
+# Media: images, video, audio
+	ExpiresByType image/gif                 "access plus 1 month"
+	ExpiresByType image/png                 "access plus 1 month"
+	ExpiresByType image/jpeg                "access plus 1 month"
+	ExpiresByType video/ogg                 "access plus 1 month"
+	ExpiresByType audio/ogg                 "access plus 1 month"
+	ExpiresByType video/mp4                 "access plus 1 month"
+	ExpiresByType video/webm                "access plus 1 month"
+#
+# HTC files  (css3pie)
+  	ExpiresByType text/x-component          "access plus 1 month"
+#
+# Webfonts
+#
+	ExpiresByType application/x-font-ttf    "access plus 1 month"
+	ExpiresByType font/opentype             "access plus 1 month"
+	ExpiresByType application/x-font-woff   "access plus 1 month"
+	ExpiresByType image/svg+xml             "access plus 1 month"
+	ExpiresByType application/vnd.ms-fontobject "access plus 1 month"
+#
+# CSS and JavaScript
+	ExpiresByType text/css                  "access plus 1 week"
+	ExpiresByType application/javascript    "access plus 1 week"
+</IfModule>
+#
+#
+# ----------------------------------------------------------------------
+# Prevent mobile network providers from modifying your site
+# ----------------------------------------------------------------------
+# The following header prevents modification of your code over 3G on some
+# European providers.
+# This is the official 'bypass' suggested by O2 in the UK.
+<IfModule mod_headers.c>
+	Header set Cache-Control "no-transform"
+</IfModule>
+#
+#
+# ----------------------------------------------------------------------
+# ETag removal
+# ----------------------------------------------------------------------
+# FileETag None is not enough for every server.
+<IfModule mod_headers.c>
+  	Header unset ETag
+</IfModule>
+# Since we are sending far-future expires, we don not need ETags for
+# static content.
+# futher details: developer.yahoo.com/performance/rules.html#etags
+FileETag None
+#
+#
+# ----------------------------------------------------------------------
+# Stop screen flicker in IE on CSS rollovers
+# ----------------------------------------------------------------------
+# The following directives stop screen flicker in IE on CSS rollovers - in
+# combination with the "ExpiresByType" rules for images (see above).
+BrowserMatch "MSIE" brokenvary=1
+BrowserMatch "Mozilla/4.[0-9]{2}" brokenvary=1
+BrowserMatch "Opera" !brokenvary
+SetEnvIf brokenvary 1 force-no-vary
+#
+#
+#
+#
+# ----------------------------------------------------------------------
+# A little more security
+# ----------------------------------------------------------------------
+# To avoid displaying the exact version number of Apache being used, add the
+# following to httpd.conf (it will not work in .htaccess):
+# ServerTokens Prod
+IndexIgnore *
+# "-Indexes" will have Apache block users from browsing folders without a
+# default document Usually you should leave this activated, because you
+# should not allow everybody to surf through every folder on your server (which
+# includes rather private places like CMS system folders).
+<IfModule mod_autoindex.c>
+  Options -Indexes
+  Options -ExecCGI
+</IfModule>
+# Block access to "hidden" directories or files whose names begin with a
+# period. This includes directories used by version control systems such as
+# Subversion or Git.
+<IfModule mod_rewrite.c>
+  RewriteCond %{SCRIPT_FILENAME} -d [OR]
+  RewriteCond %{SCRIPT_FILENAME} -f
+RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/[0-9a-zA-Z_-]+$
+RewriteCond %{REQUEST_URI} !^/\.well-known/cpanel-dcv/[0-9a-zA-Z_-]+$
+RewriteCond %{REQUEST_URI} !^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?$
+  RewriteRule "(^|/)\." - [F]
+</IfModule>
+# Block access to backup and source files. These files may be left by some
+# text/html editors and pose a great security danger, when anyone can access
+# them.
+<FilesMatch "(\.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist)|~)$">
+  Order allow,deny
+  Deny from all
+  Satisfy All
+</FilesMatch>
+AddHandler cgi-script .pl .py .asp .shtml .sh .cgi
