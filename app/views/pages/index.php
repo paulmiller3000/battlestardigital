@@ -9,7 +9,7 @@
 		  	<hr class="my-4 text-center">
 
 		  	<div class="jumbotron-btn-container">
-		        <a class="btn btn-full" href="strategy-session.html">I’m ready</a>
+		        <a class="btn btn-full" href="<?php echo URLROOT; ?>/pages/contact">I’m ready</a>
 		        <a class="btn btn-ghost js--scroll-to-services" href="#services">Show me more</a>
 			</div>
 		</div>
@@ -46,8 +46,8 @@
 			</div>
 		</div>
 
-		<div class="row justify-content-center"">
-	    	<div class="col-8 text-center">
+		<div class="container">
+	    	<div class="row justify-content-center">
 	      		<p>	&ldquo;Great, but what exactly do you mean by &lsquo;Making systems talk?!&rsquo;&rdquo;</p>
 	      		<p>Glad you asked! <a href="<?php echo URLROOT; ?>/pages/integration">Click here</a> to learn more.</p>
 	    	</div>

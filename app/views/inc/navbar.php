@@ -19,10 +19,10 @@
         <a class="nav-link" href="<?php echo URLROOT; ?>/pages/contact">Contact</a>
       </li>
     </ul>
-    <ul class="navbar-nav ml-auto">
+<!--     <ul class="navbar-nav ml-auto">
       <li class="nav-item active">
         <a class="nav-link" href="<?php echo URLROOT; ?>/users/login">Login</a>
       </li>
-    </ul>
+    </ul> -->
   </div>
 </nav>
