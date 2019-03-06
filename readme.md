@@ -1,5 +1,9 @@
 # Battlestar Digital
-Custom website built using Brad Traversy's open-source TraversyMVC MVC (Model View Controller) framework. You can learn more about Brad and find his course here: https://www.udemy.com/object-oriented-php-mvc
+Custom website built using Brad Traversy's open-source TraversyMVC (Model View Controller) framework. You can learn more about Brad and find his course here: https://www.udemy.com/object-oriented-php-mvc
+
+
+## Note
+The TraversyMVC framework is presumably intended for sites in a dedicating hosting environment. If you run into a 500 error deploying this in a production environment environment AND you use shared hosting, consider moving to an AWS EC2 instance or other dedicated hosting. Here's why: https://paulmiller3000.com/500-error-traversymvc-shared-hosting/
 
 ## Enhancements
 ### Planned

@@ -20,6 +20,11 @@
   	RewriteEngine on
   	RewriteRule ^$ public/ [L]
 	RewriteRule (.*) public/$1 [L]
+#
+#	RewriteEngine On
+	RewriteBase /
+	RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+	RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 </IfModule>
 #
 # Code below, source: https://gist.github.com/ludo237/5857215
