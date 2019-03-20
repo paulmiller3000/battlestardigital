@@ -5,6 +5,8 @@ Custom website built using Brad Traversy's open-source TraversyMVC (Model-View-C
 ## Note
 The TraversyMVC framework is presumably intended for sites in a dedicating hosting environment. If you run into a 500 error deploying this in a production environment AND you use shared hosting, consider moving to an AWS EC2 instance or other dedicated hosting. Here's why: https://paulmiller3000.com/500-error-traversymvc-shared-hosting/
 
+Also, please note that I have since updated battlestardigital.com to use WordPress. At this time, I do not have a demo copy of this framework online.
+
 ## Enhancements
 ### Planned
 - Move the database name, user name, and password to a config file
